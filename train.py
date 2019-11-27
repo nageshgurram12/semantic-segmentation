@@ -70,7 +70,10 @@ class Session:
             dataset, batch_size=settings.BATCH_SIZE, pin_memory=True,
             num_workers=settings.NUM_WORKERS, shuffle=True, drop_last=True)
 
-        self.net = EMANet(settings.N_CLASSES, settings.N_LAYERS).cuda()
+        self.crit = nn.CrossEntropyLoss(ignore_index=settings.IGNORE_LABEL, \
+            reduction='none')
+        
+        self.net = EMANet(settings.N_CLASSES, settings.N_LAYERS)
         self.opt = SGD(
             params=[
                 {
@@ -92,6 +95,7 @@ class Session:
 
         self.net = DataParallel(self.net, device_ids=settings.DEVICES)
         patch_replication_callback(self.net)
+        self.net = self.net.cuda()
 
     def write(self, out):
         for k, v in out.items():
@@ -126,7 +130,7 @@ class Session:
         self.step = obj['step']
 
     def train_batch(self, image, label):
-        loss, mu = self.net(image, label)
+        pred, mu = self.net(image, label)
 
         with torch.no_grad():
             mu = mu.mean(dim=0, keepdim=True)
@@ -134,8 +138,8 @@ class Session:
             self.net.module.emau.mu *= momentum
             self.net.module.emau.mu += mu * (1 - momentum)
 
-        loss = loss.mean()
         self.opt.zero_grad()
+        loss = self.crit(pred, label)/settings.BATCH_SIZE
         loss.backward()
         self.opt.step()
 
@@ -143,7 +147,7 @@ class Session:
 
 
 def main(ckp_name='latest.pth'):
-    sess = Session(dt_split='trainaug')
+    sess = Session(dt_split='train')
     sess.load_checkpoints(ckp_name)
 
     dt_iter = iter(sess.dataloader)
@@ -164,6 +168,7 @@ def main(ckp_name='latest.pth'):
             dt_iter = iter(sess.dataloader)
             image, label = next(dt_iter)
 
+        image, label = image.cuda(), label.cuda()
         loss = sess.train_batch(image, label)
         out = {'loss': loss}
         sess.write(out)

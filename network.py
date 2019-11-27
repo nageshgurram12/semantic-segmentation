@@ -284,8 +284,8 @@ class EMANet(nn.Module):
         self.fc2 = nn.Conv2d(256, n_classes, 1)
 
         # Put the criterion inside the model to make GPU load balanced
-        self.crit = CrossEntropyLoss2d(ignore_index=settings.IGNORE_LABEL, 
-                                       reduction='none')
+        #self.crit = CrossEntropyLoss2d(ignore_index=settings.IGNORE_LABEL, \
+            reduction='none')
 
     def forward(self, img, lbl=None, size=None):
         x = self.extractor(img)
@@ -298,23 +298,27 @@ class EMANet(nn.Module):
             size = img.size()[-2:]
         pred = F.interpolate(x, size=size, mode='bilinear', align_corners=True)
 
+        return pred, mu
+    
+        '''
         if self.training and lbl is not None:
             loss = self.crit(pred, lbl)
             return loss, mu
         else:
             return pred
-
-
+        '''
+'''
 class CrossEntropyLoss2d(nn.Module):
     def __init__(self, weight=None, reduction='none', ignore_index=-1):
         super(CrossEntropyLoss2d, self).__init__()
         self.nll_loss = nn.NLLLoss(weight, reduction=reduction, 
                                    ignore_index=ignore_index)
+        self.nll_loss = self.nll_loss.cuda()
 
     def forward(self, inputs, targets):
         loss = self.nll_loss(F.log_softmax(inputs, dim=1), targets)
         return loss.mean(dim=2).mean(dim=1)
-
+'''
 
 def test_net():
     model = EMANet(n_classes=21, n_layers=50)
