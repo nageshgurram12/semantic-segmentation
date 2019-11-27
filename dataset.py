@@ -111,7 +111,7 @@ class TrainDataset(BaseDataset):
 
     def _get_item(self, image_id):
         image_path = osp.join(self.data_root, 'JPEGImages', image_id + '.jpg')
-        label_path = osp.join(self.data_root, 'SegmentationClassAug', 
+        label_path = osp.join(self.data_root, 'SegmentationClass', 
                               image_id + '.png')
 
         image, label = fetch(image_path, label_path)
@@ -129,7 +129,7 @@ class ValDataset(BaseDataset):
 
     def _get_item(self, image_id):
         image_path = osp.join(self.data_root, 'JPEGImages', image_id + '.jpg')
-        label_path = osp.join(self.data_root, 'SegmentationClassAug', 
+        label_path = osp.join(self.data_root, 'SegmentationClass', 
                               image_id + '.png')
 
         image, label = fetch(image_path, label_path)

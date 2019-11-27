@@ -18,7 +18,7 @@ class Bottleneck(nn.Module):
     expansion = 4
     def __init__(self, inplanes, planes, stride=1, dilation=1,
                  downsample=None, previous_dilation=1):
-        super().__init__()
+        super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, 1, bias=False)
         self.bn1 = norm_layer(planes)
         self.conv2 = nn.Conv2d(planes, planes, 3, stride, dilation, dilation, 
@@ -57,7 +57,7 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=1000, stride=8):
         self.inplanes = 128
-        super().__init__()
+        super(ResNet, self).__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False),
             norm_layer(64),
@@ -264,7 +264,7 @@ class EMAU(nn.Module):
 class EMANet(nn.Module):
     ''' Implementation of EMANet (ICCV 2019 Oral).'''
     def __init__(self, n_classes, n_layers):
-        super().__init__()
+        super(EMANet, self).__init__()
         backbone = resnet(n_layers, settings.STRIDE)
         self.extractor = nn.Sequential(
             backbone.conv1,
