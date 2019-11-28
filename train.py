@@ -71,7 +71,7 @@ class Session:
             num_workers=settings.NUM_WORKERS, shuffle=True, drop_last=True)
 
         self.crit = nn.CrossEntropyLoss(ignore_index=settings.IGNORE_LABEL, \
-            reduction='none')
+            reduction='mean')
         
         self.net = EMANet(settings.N_CLASSES, settings.N_LAYERS)
         self.opt = SGD(
@@ -130,7 +130,7 @@ class Session:
         self.step = obj['step']
 
     def train_batch(self, image, label):
-        pred, mu = self.net(image, label)
+        loss, mu = self.net(image, label)
 
         with torch.no_grad():
             mu = mu.mean(dim=0, keepdim=True)
@@ -138,8 +138,9 @@ class Session:
             self.net.module.emau.mu *= momentum
             self.net.module.emau.mu += mu * (1 - momentum)
 
+        loss = loss.mean()
         self.opt.zero_grad()
-        loss = self.crit(pred, label)/settings.BATCH_SIZE
+        #loss = self.crit(pred, label.long())
         loss.backward()
         self.opt.step()
 

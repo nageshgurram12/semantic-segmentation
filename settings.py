@@ -13,14 +13,14 @@ IGNORE_LABEL = 255
 
 # Model definition
 N_CLASSES = 21
-N_LAYERS = 101
+N_LAYERS = 50
 STRIDE = 8
 BN_MOM = 3e-4
 EM_MOM = 0.9
 STAGE_NUM = 3
 
 # Training settings
-BATCH_SIZE = 16
+BATCH_SIZE = 4
 ITER_MAX = 30000
 ITER_SAVE = 2000
 
@@ -35,7 +35,7 @@ DEVICES = list(range(0, 1))
 
 LOG_DIR = './logdir' 
 MODEL_DIR = './models'
-NUM_WORKERS = 16
+NUM_WORKERS = 4
 
 logger = logging.getLogger('train')
 logger.setLevel(logging.INFO)
